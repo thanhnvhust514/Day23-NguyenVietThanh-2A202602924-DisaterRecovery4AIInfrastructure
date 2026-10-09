@@ -6,15 +6,10 @@ edge/active_region
 run/*
 !run/.gitkeep
 
-# Log/evidence: MAC DINH bo qua rac, NHUNG cac file bang chung
-# duoi day BAT BUOC phai commit de cham diem (xem RUBRIC.md).
+# Log/evidence giu local, khong push theo yeu cau nop bai.
 reports/*.jsonl
 reports/*.json
-!reports/drill-1-nodr.jsonl
-!reports/drill-2-withdr.jsonl
-!reports/failover-events.jsonl
-!reports/health-events.jsonl
-!reports/replication.jsonl
+chaos/*.jsonl
 
 # File tam do test/thu nghiem sinh ra (khong phai bang chung)
 reports/_*.jsonl
