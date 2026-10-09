@@ -29,13 +29,60 @@ URL = {"a": "http://127.0.0.1:8001", "b": "http://127.0.0.1:8002"}
 
 
 def probe(region: str, timeout: float) -> tuple[bool, str]:
-    """TODO: trả về (ready, reason). Timeout PHẢI có — netblock làm request treo mãi."""
-    raise NotImplementedError
+    """Kiểm tra readiness với timeout hữu hạn."""
+    try:
+        response = httpx.get(f"{URL[region]}/readyz", timeout=timeout)
+        if response.status_code == 200:
+            return True, "ready"
+        try:
+            reasons = response.json().get("reasons", [])
+            reason = "; ".join(str(item) for item in reasons)
+        except (ValueError, AttributeError, TypeError):
+            reason = ""
+        return False, reason or f"HTTP {response.status_code}"
+    except httpx.RequestError as exc:
+        return False, f"{type(exc).__name__}: {exc}"
 
 
 def run(interval: float, timeout: float, threshold: int, duration: float, out: pathlib.Path):
-    """TODO: vòng lặp poll + phát hiện transition + ghi JSONL."""
-    raise NotImplementedError
+    """Poll hai region; chỉ log transition sau khi xác nhận lỗi liên tiếp."""
+    if interval <= 0 or timeout <= 0 or threshold < 1 or duration < 0:
+        raise ValueError("interval/timeout > 0, threshold >= 1, duration >= 0")
+    out = pathlib.Path(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    # Trạng thái ban đầu là HEALTHY; không phát alert trước đủ threshold lỗi.
+    states = {region: "HEALTHY" for region in URL}
+    failures = {region: 0 for region in URL}
+    end = time.monotonic() + duration
+    with out.open("a", encoding="utf-8") as log:
+        while time.monotonic() < end:
+            started = time.monotonic()
+            for region in URL:
+                ready, reason = probe(region, timeout)
+                failures[region] = 0 if ready else failures[region] + 1
+                new_state = states[region]
+                if ready:
+                    new_state = "HEALTHY"
+                elif failures[region] >= threshold:
+                    new_state = "UNHEALTHY"
+                if new_state != states[region]:
+                    ts = time.time()
+                    event = {
+                        "ts": ts,
+                        "iso": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(ts)),
+                        "event": "state_change", "region": region,
+                        "from": states[region], "to": new_state,
+                        "reason": reason, "consecutive_fails": failures[region],
+                        "interval_s": interval, "threshold": threshold,
+                    }
+                    log.write(json.dumps(event) + "\n")
+                    log.flush()
+                    print(json.dumps(event), flush=True)
+                    states[region] = new_state
+            remaining = end - time.monotonic()
+            delay = interval - (time.monotonic() - started)
+            if remaining > 0 and delay > 0:
+                time.sleep(min(delay, remaining))
 
 
 if __name__ == "__main__":
