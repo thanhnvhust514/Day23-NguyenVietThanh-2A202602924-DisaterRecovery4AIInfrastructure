@@ -69,4 +69,4 @@ Owner là vai trò đề xuất để IC phân công. Deadline theo giờ Việt
 
 ## 6. Bảo toàn hồ sơ
 
-Giữ raw logs cùng ba reports. reports/runbook-run.jsonl đang bị Git ignore; khi nộp dùng `git add -f reports/runbook-run.jsonl` để giữ timeline. Không sửa timestamp để hợp thức hóa phương pháp. Người chấm cần xác nhận chấp nhận manual_stop nếu yêu cầu netblock --mock.
+Giữ raw logs cùng ba reports. Chỉ nộp năm log evidence theo ngoại lệ .gitignore; log chaos và runbook giữ local, cung cấp riêng khi cần đối chiếu timeline. Không sửa timestamp để hợp thức hóa phương pháp. Người chấm cần xác nhận chấp nhận manual_stop nếu yêu cầu netblock --mock.

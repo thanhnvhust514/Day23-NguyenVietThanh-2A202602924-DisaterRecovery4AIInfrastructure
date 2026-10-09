@@ -71,6 +71,6 @@ python tools/measure_rto.py --loadgen reports/drill-2-withdr.jsonl --target-rto 
 python -X utf8 -m pytest tests/ -v
 ```
 
-Giữ nguyên raw logs để số dòng không đổi. Khi nộp qua Git, kèm file bị ignore bằng `git add -f reports/runbook-run.jsonl` vì báo cáo tham chiếu timeline của nó. Không chỉnh timestamp hoặc thêm request giả. PASS của công cụ chưa xác nhận người chấm chấp nhận phương pháp manual_stop thay cho netblock --mock.
+Giữ nguyên raw logs để số dòng không đổi. Nộp năm log evidence theo ngoại lệ .gitignore. Log chaos và runbook giữ local; các dẫn chứng tới hai log này cần bản local để đối chiếu. Không chỉnh timestamp hoặc thêm request giả. PASS của công cụ chưa xác nhận người chấm chấp nhận phương pháp manual_stop thay cho netblock --mock.
 
 Trên Windows, dùng -X utf8 vì tests đọc Markdown bằng encoding mặc định; tránh lỗi cp1252 khi đọc tiếng Việt.
